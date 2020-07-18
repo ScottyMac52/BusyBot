@@ -97,6 +97,7 @@
                 if (answer == DialogResult.Yes)
                 {
                     StateChanged(BotState.Running);
+                    Execute();
                 }
             }
         }
@@ -148,12 +149,7 @@
             this.Controls.Add(StateButton);
         }
 
-        /// <summary>
-        /// Fires when the interval expires
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Execute()
         {
             // Make sure the target window is able to receive input
             if (Program.SetForegroundWindow(TargetWindow) == true)
@@ -177,6 +173,16 @@
                 StateChanged(BotState.Faulted);
                 MessageBox.Show($"Unable to find a window using class {Config.Instance.FindClass}. Busy bot is stopped and disabled. Please stop it and check the configuration.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// Fires when the interval expires
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Execute();
         }
     }
 }
