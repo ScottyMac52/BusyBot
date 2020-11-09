@@ -1,6 +1,7 @@
 ﻿namespace BusyBotForm
 {
     using System;
+    using System.Text;
     using System.Windows.Forms;
 
     public partial class Form1 : Form
@@ -154,18 +155,30 @@
             // Make sure the target window is able to receive input
             if (Program.SetForegroundWindow(TargetWindow) == true)
             {
-                var linesToWrite = Config.Instance.LinesToWrite;
-                SendKeys.SendWait($"{ExecutionCounter} - {Config.Instance.Message}");
-                LineCounter++;
-                if (LineCounter % linesToWrite == 0)
+                try
                 {
-                    SendKeys.SendWait($"{{HOME}}{Environment.NewLine}");
-                    LineCounter = 0;
-                    ExecutionCounter++;
+                    var linesToWrite = Config.Instance.LinesToWrite;
+                    var rand = new Random();
+                    var currentMessage = Config.Instance.Messages[rand.Next(0, Config.Instance.Messages.Count - 1)];
+                    SendKeys.SendWait($"{currentMessage}{Environment.NewLine}");
+                    LineCounter++;
+                    if (LineCounter % linesToWrite == 0)
+                    {
+                        SendKeys.SendWait($"{{HOME}}{Environment.NewLine}");
+                        SendKeys.SendWait(GetHomeTab(linesToWrite - 1));
+                        LineCounter = 0;
+                        ExecutionCounter++;
+                    }
+                    else
+                    {
+                        SendKeys.SendWait("\t");
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    SendKeys.SendWait("\t");
+                    StateChanged(BotState.Faulted);
+                    MessageBox.Show($"Unhandled exception has occurred while sending keystrokes. Exception {ex}", "Runtime Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
                 }
             }
             else
@@ -173,6 +186,17 @@
                 StateChanged(BotState.Faulted);
                 MessageBox.Show($"Unable to find a window using class {Config.Instance.FindClass}. Busy bot is stopped and disabled. Please stop it and check the configuration.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private string GetHomeTab(int tabCount)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append($"{{HOME}}");
+            for(int x = 0; x < tabCount; x++)
+            {
+                stringBuilder.Append($"+{{TAB}}");
+            }
+            return stringBuilder.ToString();
         }
 
         /// <summary>
