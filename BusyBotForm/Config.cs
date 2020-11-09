@@ -39,9 +39,17 @@ namespace BusyBotForm
         public string FindClass => GetConfigurationValueSafely("FindClass", "Notepad");
 
         /// <summary>
-        /// Message to print
+        /// Messages to print
         /// </summary>
-        public string Message => GetConfigurationValueSafely("Message", "None");
+        public List<string> Messages
+        {
+            get
+            {
+                var messageList = new List<string>();
+                this.Configuration.GetSection("Messages").Bind(messageList);
+                return messageList;
+            }
+        }
 
         /// <summary>
         /// How many lines to write for each set
